@@ -13,7 +13,7 @@ export default class App extends Component {
 
   componentDidMount() {
     // db.on("value", func) setzt einen Listener auf die externe Datenbank. 
-    // Immer wenn sie die Daten dort ändern, wird so automatisch unser State in der App aktualisiert. 
+    // Immer wenn sich die Daten dort ändern, wird so automatisch unser State in der App aktualisiert. 
     // Dadurch ist unser State immer synchron zum Datenbestand in der externen DB.
     db.on("value", dbSnapshot => {
       const itemsFromDB = dbSnapshot.val();
@@ -26,7 +26,7 @@ export default class App extends Component {
   // componentDidUpdate ist ein React LifeCycleHook. Immer wenn sich der State ändert, wird diese Methode automatisch aufgerufen.
   // Wenn sich der State unserer App ändern, wird hiermit automatisch auch die externe Datenbank aktualisiert.
   componentDidUpdate(prevProps, prevState) {
-    if (prevState !== this.state) {
+    if (prevState.items.length !== this.state.items.length) {
       db.set(this.state);
     }
   }
