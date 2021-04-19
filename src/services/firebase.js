@@ -2,13 +2,13 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 
 const config = {
-  apiKey: "AIzaSyDEvgAtsxyLzlcJL08Wyva3tTHhepT_Cm8",
-  authDomain: "database-sc.firebaseapp.com",
-  databaseURL: "https://database-sc-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "database-sc",
-  storageBucket: "database-sc.appspot.com",
-  messagingSenderId: "793281305958",
-  appId: "1:793281305958:web:76676725032d79c83bfca7"
+  apiKey: "AIzaSyASiLo_OTebZdBl6v5XqPsFioZTQUNEGJ4",
+  authDomain: "sc-tutorial-f6035.firebaseapp.com",
+  databaseURL: "https://sc-tutorial-f6035-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "sc-tutorial-f6035",
+  storageBucket: "sc-tutorial-f6035.appspot.com",
+  messagingSenderId: "17552733411",
+  appId: "1:17552733411:web:430ac4663ca06d6986c1d6"
 }
 
 firebase.initializeApp(config);
