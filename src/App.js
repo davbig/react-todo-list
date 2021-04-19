@@ -11,31 +11,30 @@ export default class App extends Component {
     }
   }
 
+  // Diese Methode wird nur EINMAL aufgerufen (automatisch zu Beginn der App)
   componentDidMount() {
-    // db.on("value", func) setzt einen Listener auf die externe Datenbank. 
-    // Immer wenn sich die Daten dort ändern, wird so automatisch unser State in der App aktualisiert. 
-    // Dadurch ist unser State immer synchron zum Datenbestand in der externen DB.
-    db.on("value", dbSnapshot => {
-      const itemsFromDB = dbSnapshot.val();
-      if (itemsFromDB && itemsFromDB.items) {
-        this.setState({ items: itemsFromDB.items });
-      }
-    });
+    // Auslesen der Daten aus dem firestore
+    db.collection('items').get().then(res => {
+      res.docs.forEach(item=>{
+        this.setState({ // Daten aus dem firestore werden dem State hinzugefügt
+          items: [...this.state.items, item.data().name]
+        })
+      })
+    })
   }
 
-  // componentDidUpdate ist ein React LifeCycleHook. Immer wenn sich der State ändert, wird diese Methode automatisch aufgerufen.
-  // Wenn sich der State unserer App ändern, wird hiermit automatisch auch die externe Datenbank aktualisiert.
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.items.length !== this.state.items.length) {
-      db.set(this.state);
-    }
-  }
-
+  // Diese Methode wird beim Abschicken des Formulars ausgeführt
   addItem(e) {
     e.preventDefault(); // verhindert Neuladen der Seite
     e.target.reset(); // Input-Felder leeren
-    if (this.state.newItem === '') return;
+    if (this.state.newItem === '') return; // Falls es kein newItem im State gibt => Abbruch hier!
 
+    // Hinzufügen des neuen items in den firestore
+    db.collection('items').add({
+        name: this.state.newItem
+    });
+
+    // ...und in den lokalen State unserer React App
     this.setState({ 
       items: [...this.state.items, this.state.newItem], // Neues Item wird dem State hinzugefügt
       newItem: ''
@@ -46,17 +45,21 @@ export default class App extends Component {
     this.setState({ newItem: value });
   }
 
-  deleteItem(key) {
-    this.setState({
-      items: this.state.items.filter((item, index) => index !== key) // Item wird aus State entfernt
-    })
+  deleteItem(value) {
+    db.collection('items').where("name", "==", value).get()
+    .then(querySnapshot => {
+        querySnapshot.docs[0].ref.delete(); // Item wird aus dem firestore gelöscht
+        this.setState({
+          items: this.state.items.filter(item => item !== value) // Item wird aus State entfernt
+        })
+    });
   } 
   
   render() {
     return (
       <div className="app">
         <header><h1>TO-DO LIST</h1></header>
-        <ul>{ this.state.items && this.state.items.map((value, key) => <li key={key} onClick={() => this.deleteItem(key)}>{value}</li>)}</ul>
+        <ul>{ this.state.items && this.state.items.map((value, key) => <li key={key} onClick={() => this.deleteItem(value)}>{value}</li>)}</ul>
         <footer>
           <form onSubmit={e => this.addItem(e)}>
             <input placeholder="new item" onChange={ e => this.handleChange(e.target.value) }></input>

@@ -1,5 +1,5 @@
 import firebase from 'firebase/app';
-import 'firebase/database';
+import 'firebase/firestore';
 
 const config = {
   apiKey: "AIzaSyDEvgAtsxyLzlcJL08Wyva3tTHhepT_Cm8",
@@ -12,6 +12,7 @@ const config = {
 }
 
 firebase.initializeApp(config);
-const db = firebase.database().ref('todo/');
+
+const db = firebase.firestore();
 
 export default db;
