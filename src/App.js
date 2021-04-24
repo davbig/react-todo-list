@@ -1,5 +1,4 @@
 import db from './services/firebase';
-
 import React, { Component } from 'react'
 
 export default class App extends Component {
@@ -7,50 +6,53 @@ export default class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      items: []
+      items: [],
+      newItem: {},
     }
   }
 
-  // Diese Methode wird nur EINMAL aufgerufen (automatisch zu Beginn der App)
   componentDidMount() {
-    // Auslesen der Daten aus dem firestore
     db.collection('items').get().then(res => {
       res.docs.forEach(item=>{
-        this.setState({ // Daten aus dem firestore werden dem State hinzugefügt
+        this.setState({ 
           items: [...this.state.items, item.data().name]
         })
       })
     })
   }
 
-  // Diese Methode wird beim Abschicken des Formulars ausgeführt
   addItem(e) {
-    e.preventDefault(); // verhindert Neuladen der Seite
-    e.target.reset(); // Input-Felder leeren
-    if (this.state.newItem === '') return; // Falls es kein newItem im State gibt => Abbruch hier!
+    e.preventDefault(); 
+    console.log(this.state.newItem);
+    // return;
 
-    // Hinzufügen des neuen items in den firestore
-    db.collection('items').add({
-        name: this.state.newItem
-    });
+    
+    // const value = e.target[0].value;
+    e.target.reset(); 
 
-    // ...und in den lokalen State unserer React App
+    if (this.state.newItem === '') return;
+
+    db.collection('items').add(this.state.newItem);
+
     this.setState({ 
-      items: [...this.state.items, this.state.newItem], // Neues Item wird dem State hinzugefügt
-      newItem: ''
+      items: [...this.state.items, this.state.newItem],
+      newItem: {}
     });
   }
 
-  handleChange(value) {
-    this.setState({ newItem: value });
+  handleChange(key, value) {
+    const newItem = this.state.newItem;
+    newItem[key] = value;
+
+    this.setState({ newItem });
   }
 
   deleteItem(value) {
     db.collection('items').where("name", "==", value).get()
-    .then(querySnapshot => {
-        querySnapshot.docs[0].ref.delete(); // Item wird aus dem firestore gelöscht
+    .then(res => {
+        res.docs[0].ref.delete();
         this.setState({
-          items: this.state.items.filter(item => item !== value) // Item wird aus State entfernt
+          items: this.state.items.filter(item => item !== value)
         })
     });
   } 
@@ -62,7 +64,8 @@ export default class App extends Component {
         <ul>{ this.state.items && this.state.items.map((value, key) => <li key={key} onClick={() => this.deleteItem(value)}>{value}</li>)}</ul>
         <footer>
           <form onSubmit={e => this.addItem(e)}>
-            <input placeholder="new item" onChange={ e => this.handleChange(e.target.value) }></input>
+            <input placeholder="name" onChange={ e => this.handleChange("name", e.target.value) }></input>
+            <input placeholder="color" onChange={ e => this.handleChange("color", e.target.value) }></input>
             <button type="submit">ADD</button>
           </form>
         </footer>
